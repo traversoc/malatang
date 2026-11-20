@@ -113,17 +113,16 @@ while running:
     for name, rect in BUTTONS:
         pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
-    # Items in bowl
+    bowl_display_rect = player_bowl.image.get_rect(center=bowl_rect.center)
+    screen.blit(player_bowl.image, bowl_display_rect)
+
+    # 2. Draw the ingredients ON TOP of the bowl
     for item in player_bowl.items:
         rotated_sprite = pygame.transform.rotate(item["image"], item["rotation"])
         draw_x = bowl_rect.centerx + item["offset_x"]
         draw_y = bowl_rect.centery + item["offset_y"]
         rect = rotated_sprite.get_rect(center=(draw_x, draw_y))
         screen.blit(rotated_sprite, rect)
-
-    # Bowl outline
-    pygame.draw.ellipse(screen, (180, 180, 180), bowl_rect, 3)
-
     # --- RENDERING UI (FILLED IN) ---
     if game_state == "PLAYING":
         # Draw Target Info on the right panel
