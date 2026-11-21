@@ -7,6 +7,7 @@ import ingredients
 import scoring
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMG_DIR = os.path.join(BASE_DIR, "images")
 
 # Initialize
 pygame.init()
@@ -14,14 +15,18 @@ screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Malatang Simulator - Prototype")
 
 # Load Background
-bg_image = pygame.image.load(os.path.join(BASE_DIR, "images\\background.png")).convert()
+bg_image = pygame.image.load(os.path.join(IMG_DIR, "background.png")).convert()
 bg_image = pygame.transform.scale(bg_image, (500, 600))
+
+# Load Title Screen (full window size)
+title_image = pygame.image.load(os.path.join(IMG_DIR, "titlescreen.png")).convert()
+title_image = pygame.transform.scale(title_image, (800, 600))
 
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 24)
 big_font = pygame.font.SysFont(None, 36)
 
-game_state = "PLAYING"
+game_state = "TITLE"
 
 CATEGORY_COLORS = {
     "Vegetable": (50, 200, 50),
@@ -32,7 +37,7 @@ CATEGORY_COLORS = {
 }
 
 def load_sprite(name, category):
-    path = os.path.join(BASE_DIR, "images", f"{name}.png")
+    path = os.path.join(IMG_DIR, f"{name}.png")
     if os.path.exists(path):
         img = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(img, (40, 40))
@@ -58,7 +63,7 @@ player_bowl = Bowl(price_per_gram=0.0296)
 bowl_rect = pygame.Rect(0, 0, 200, 100)
 bowl_rect.center = (650, 450)
 
-# --- GAME VARIABLES (ADDED) ---
+# --- GAME VARIABLES ---
 PRICE_PER_50G = 1.48
 target_budget = scoring.generate_customer_target()
 required_item = random.choice(list(ingredients.INGREDIENTS.keys()))
@@ -66,7 +71,7 @@ actual_price = 0.0
 final_score = 0
 missing = []
 
-# --- UI BUTTONS (ADDED) ---
+# --- UI BUTTONS ---
 submit_button_rect = pygame.Rect(520, 520, 250, 50)
 next_button_rect = pygame.Rect(520, 520, 250, 50)
 
@@ -76,6 +81,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        # Title screen: Spacebar starts the game
+        if event.type == pygame.KEYDOWN and game_state == "TITLE":
+            if event.key == pygame.K_SPACE:
+                game_state = "PLAYING"
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if game_state == "PLAYING":
                 # Check ingredient buttons
@@ -83,35 +93,39 @@ while running:
                     if rect.collidepoint(event.pos):
                         weight = ingredients.generate_weight(name)
                         player_bowl.add(name, weight, SPRITES[name])
-                
+
                 # Check Submit Button
                 if submit_button_rect.collidepoint(event.pos):
-                    # CALCULATE SCORE
                     missing = player_bowl.check_requirements([required_item])
                     actual_price, final_score = scoring.calculate_score(
-                        player_bowl.total_weight(), 
-                        PRICE_PER_50G, 
-                        target_budget, 
+                        player_bowl.total_weight(),
+                        PRICE_PER_50G,
+                        target_budget,
                         len(missing)
                     )
                     game_state = "EVALUATING"
-                    
+
             elif game_state == "EVALUATING":
                 if next_button_rect.collidepoint(event.pos):
                     player_bowl.clear()
-                    # Generate new round data
                     target_budget = scoring.generate_customer_target()
                     required_item = random.choice(list(ingredients.INGREDIENTS.keys()))
                     game_state = "PLAYING"
 
+    # --- TITLE SCREEN RENDERING ---
+    if game_state == "TITLE":
+        screen.blit(title_image, (0, 0))
+        pygame.display.flip()
+        clock.tick(60)
+        continue  # skip drawing the game underneath
 
     # Rendering
     screen.fill((60, 40, 30))
     screen.blit(bg_image, (0, 0))
 
-    # Prototype hitboxes (you can comment this out to hide red boxes)
-    for name, rect in BUTTONS:
-        pygame.draw.rect(screen, (255, 0, 0), rect, 1)
+    # # Prototype hitboxes (comment out to hide red boxes)
+    # for name, rect in BUTTONS:
+    #     pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
     # Items in bowl
     for item in player_bowl.items:
@@ -124,33 +138,29 @@ while running:
     # Bowl outline
     pygame.draw.ellipse(screen, (180, 180, 180), bowl_rect, 3)
 
-    # --- RENDERING UI (FILLED IN) ---
+    # --- UI ---
     if game_state == "PLAYING":
-        # Draw Target Info on the right panel
         screen.blit(big_font.render(f"Target: ¥{target_budget:.2f}", True, (255, 255, 0)), (520, 20))
         screen.blit(font.render(f"Price: ¥{PRICE_PER_50G:.2f} / 50g", True, (200, 200, 200)), (520, 60))
-        
+
         screen.blit(font.render("Must Have:", True, (200, 200, 200)), (520, 100))
         screen.blit(font.render(f"- {required_item}", True, (255, 100, 100)), (530, 130))
-        
+
         screen.blit(font.render(f"Items in bowl: {len(player_bowl.items)}", True, (255, 255, 255)), (520, 180))
 
-        # Draw Submit Button
         pygame.draw.rect(screen, (0, 150, 0), submit_button_rect)
-        pygame.draw.rect(screen, (255, 255, 255), submit_button_rect, 2) # Border
+        pygame.draw.rect(screen, (255, 255, 255), submit_button_rect, 2)
         screen.blit(font.render("Weigh & Pay", True, (255, 255, 255)), (submit_button_rect.x + 80, submit_button_rect.y + 15))
 
     elif game_state == "EVALUATING":
-        # Draw semi-transparent overlay
         overlay = pygame.Surface((800, 600), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
 
-        # Draw Results
         screen.blit(big_font.render("RESULTS", True, (255, 255, 255)), (350, 150))
         screen.blit(font.render(f"Target Price: ¥{target_budget:.2f}", True, (255, 255, 255)), (320, 220))
         screen.blit(font.render(f"Your Price:   ¥{actual_price:.2f}", True, (255, 255, 255)), (320, 250))
-        
+
         if len(missing) > 0:
             screen.blit(font.render(f"Missing: {', '.join(missing)}", True, (255, 50, 50)), (320, 280))
         else:
@@ -158,9 +168,8 @@ while running:
 
         screen.blit(big_font.render(f"Score: {final_score}/100", True, (255, 255, 0)), (320, 340))
 
-        # Draw Next Button
         pygame.draw.rect(screen, (0, 0, 150), next_button_rect)
-        pygame.draw.rect(screen, (255, 255, 255), next_button_rect, 2) # Border
+        pygame.draw.rect(screen, (255, 255, 255), next_button_rect, 2)
         screen.blit(font.render("Next Customer", True, (255, 255, 255)), (next_button_rect.x + 65, next_button_rect.y + 15))
 
     pygame.display.flip()
