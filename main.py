@@ -63,6 +63,9 @@ BUTTONS = [(name, pygame.Rect(*coords)) for name, coords in BUTTON_RECTS.items()
 player_bowl = Bowl(price_per_gram=0.0296)
 bowl_rect = pygame.Rect(0, 0, 200, 100)
 bowl_rect.center = (650, 450)
+# Load bowl
+bowl_image = pygame.image.load(os.path.join(BG_DIR, "bowl.png")).convert_alpha()
+bowl_image = pygame.transform.scale(bowl_image, bowl_rect.size)
 
 # --- GAME VARIABLES ---
 PRICE_PER_50G = 1.48
@@ -124,10 +127,12 @@ while running:
     screen.fill((60, 40, 30))
     screen.blit(bg_image, (0, 0))
 
-    # # Prototype hitboxes (comment out to hide red boxes)
+    # # Prototype food hitboxes (comment out to hide red boxes)
     # for name, rect in BUTTONS:
     #     pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
+    # Load bowl.png before Items in bowl
+    screen.blit(bowl_image, bowl_rect)
     # Items in bowl
     for item in player_bowl.items:
         rotated_sprite = pygame.transform.rotate(item["image"], item["rotation"])
@@ -135,9 +140,6 @@ while running:
         draw_y = bowl_rect.centery + item["offset_y"]
         rect = rotated_sprite.get_rect(center=(draw_x, draw_y))
         screen.blit(rotated_sprite, rect)
-
-    # Bowl outline
-    pygame.draw.ellipse(screen, (180, 180, 180), bowl_rect, 3)
 
     # --- UI ---
     if game_state == "PLAYING":
@@ -175,6 +177,10 @@ while running:
 
     pygame.display.flip()
     clock.tick(60)
+
+pygame.quit()
+sys.exit()
+
 
 pygame.quit()
 sys.exit()
