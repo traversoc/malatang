@@ -2,7 +2,7 @@ import random
 
 def generate_customer_target():
     """Generates a random target budget in RMB."""
-    return round(random.uniform(15.0, 40.0), 2)
+    return round(random.uniform(5.0, 25.0), 2)
 
 def calculate_score(total_weight_g, price_per_50g, target_budget, missing_items_count):
     """
