@@ -7,7 +7,8 @@ import ingredients
 import scoring
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-IMG_DIR = os.path.join(BASE_DIR, "images")
+IMG_DIR = os.path.join(BASE_DIR, "images", "ingredient sprites", "sprites")
+BG_DIR = os.path.join(BASE_DIR, "images")
 
 # Initialize
 pygame.init()
@@ -15,11 +16,11 @@ screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Malatang Simulator - Prototype")
 
 # Load Background
-bg_image = pygame.image.load(os.path.join(IMG_DIR, "background.png")).convert()
+bg_image = pygame.image.load(os.path.join(BG_DIR, "background.png")).convert()
 bg_image = pygame.transform.scale(bg_image, (500, 600))
 
 # Load Title Screen (full window size)
-title_image = pygame.image.load(os.path.join(IMG_DIR, "titlescreen.png")).convert()
+title_image = pygame.image.load(os.path.join(BG_DIR, "titlescreen.png")).convert()
 title_image = pygame.transform.scale(title_image, (800, 600))
 
 clock = pygame.time.Clock()
