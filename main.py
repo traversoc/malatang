@@ -131,6 +131,10 @@ while running:
     # for name, rect in BUTTONS:
     #     pygame.draw.rect(screen, (255, 0, 0), rect, 1)
 
+    bowl_display_rect = player_bowl.image.get_rect(center=bowl_rect.center)
+    screen.blit(player_bowl.image, bowl_display_rect)
+
+    # 2. Draw the ingredients ON TOP of the bowl
     # Load bowl.png before Items in bowl
     screen.blit(bowl_image, bowl_rect)
     # Items in bowl
@@ -140,8 +144,7 @@ while running:
         draw_y = bowl_rect.centery + item["offset_y"]
         rect = rotated_sprite.get_rect(center=(draw_x, draw_y))
         screen.blit(rotated_sprite, rect)
-
-    # --- UI ---
+    # --- RENDERING UI (FILLED IN) ---
     if game_state == "PLAYING":
         screen.blit(big_font.render(f"Target: ¥{target_budget:.2f}", True, (255, 255, 0)), (520, 20))
         screen.blit(font.render(f"Price: ¥{PRICE_PER_50G:.2f} / 50g", True, (200, 200, 200)), (520, 60))
@@ -177,10 +180,6 @@ while running:
 
     pygame.display.flip()
     clock.tick(60)
-
-pygame.quit()
-sys.exit()
-
 
 pygame.quit()
 sys.exit()
